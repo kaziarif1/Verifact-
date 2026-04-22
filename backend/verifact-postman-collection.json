@@ -1,0 +1,119 @@
+{
+  "info": {
+    "name": "Verifact API",
+    "description": "Complete API collection for Verifact — AI-Powered Rumor Detection Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api/v1", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "claimId", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 201) {",
+            "  pm.collectionVariables.set('accessToken', pm.response.json().data.accessToken);",
+            "  pm.test('Registration successful', () => pm.response.to.have.status(201));",
+            "  pm.test('Returns access token', () => pm.expect(pm.response.json().data.accessToken).to.be.a('string'));",
+            "}"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"demo@verifact.app\",\n  \"username\": \"demouser\",\n  \"displayName\": \"Demo User\",\n  \"password\": \"Demo1234!\"\n}" }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) {",
+            "  pm.collectionVariables.set('accessToken', pm.response.json().data.accessToken);",
+            "  pm.test('Login successful', () => pm.response.to.have.status(200));",
+            "}"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"demo@verifact.app\",\n  \"password\": \"Demo1234!\"\n}" }
+          }
+        },
+        { "name": "Get Current User", "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" } },
+        { "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/auth/logout" } },
+        { "name": "Forgot Password", "request": { "method": "POST", "url": "{{baseUrl}}/auth/forgot-password", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{ \"email\": \"demo@verifact.app\" }" } } }
+      ]
+    },
+    {
+      "name": "Claims",
+      "item": [
+        {
+          "name": "Get Feed",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/claims", "query": [
+            { "key": "sort", "value": "newest" }, { "key": "limit", "value": "20" }
+          ]}}
+        },
+        {
+          "name": "Create Claim",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 201) {",
+            "  pm.collectionVariables.set('claimId', pm.response.json().data._id);",
+            "  pm.test('Claim created', () => pm.response.to.have.status(201));",
+            "}"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/claims",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Scientists discover that eating chocolate daily improves memory by 40%\",\n  \"body\": \"A new study from Harvard claims daily chocolate consumption significantly boosts cognitive function.\",\n  \"category\": \"health\"\n}" }
+          }
+        },
+        { "name": "Get Claim by ID", "request": { "method": "GET", "url": "{{baseUrl}}/claims/{{claimId}}" } },
+        { "name": "Search Claims", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/claims/search?q=chocolate", "query": [{ "key": "q", "value": "chocolate" }] } } },
+        { "name": "Trending Facts", "request": { "method": "GET", "url": "{{baseUrl}}/claims/trending/facts" } },
+        { "name": "Trending Rumors", "request": { "method": "GET", "url": "{{baseUrl}}/claims/trending/rumors" } },
+        { "name": "Vote Up", "request": { "method": "POST", "url": "{{baseUrl}}/claims/{{claimId}}/vote", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{ \"direction\": \"up\" }" } } },
+        { "name": "Remove Vote", "request": { "method": "DELETE", "url": "{{baseUrl}}/claims/{{claimId}}/vote" } },
+        { "name": "Delete Claim", "request": { "method": "DELETE", "url": "{{baseUrl}}/claims/{{claimId}}" } }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        { "name": "Get Public Profile", "request": { "method": "GET", "url": "{{baseUrl}}/users/demouser" } },
+        { "name": "Update Profile", "request": { "method": "PUT", "url": "{{baseUrl}}/users/me", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{ \"displayName\": \"Updated Name\", \"bio\": \"My updated bio\" }" } } },
+        { "name": "Get My Stats", "request": { "method": "GET", "url": "{{baseUrl}}/users/me/stats" } },
+        { "name": "Get My Posts", "request": { "method": "GET", "url": "{{baseUrl}}/users/me/posts" } },
+        { "name": "Get My Votes", "request": { "method": "GET", "url": "{{baseUrl}}/users/me/votes" } }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        { "name": "Get Notifications", "request": { "method": "GET", "url": "{{baseUrl}}/notifications" } },
+        { "name": "Mark All Read", "request": { "method": "PATCH", "url": "{{baseUrl}}/notifications/read-all" } }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        { "name": "Dashboard Stats", "request": { "method": "GET", "url": "{{baseUrl}}/admin/dashboard" } },
+        { "name": "Claims Queue", "request": { "method": "GET", "url": "{{baseUrl}}/admin/claims/queue" } },
+        { "name": "Set Verdict — Fact", "request": { "method": "PATCH", "url": "{{baseUrl}}/admin/claims/{{claimId}}/verdict", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{ \"decision\": \"Fact\", \"adminNote\": \"Verified by official sources.\" }" } } },
+        { "name": "Set Verdict — Rumor", "request": { "method": "PATCH", "url": "{{baseUrl}}/admin/claims/{{claimId}}/verdict", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{ \"decision\": \"Rumor\" }" } } },
+        { "name": "Get All Users", "request": { "method": "GET", "url": "{{baseUrl}}/admin/users" } },
+        { "name": "Verify User", "request": { "method": "PATCH", "url": "{{baseUrl}}/admin/users/USER_ID_HERE/verify" } },
+        { "name": "Ban / Unban User", "request": { "method": "PATCH", "url": "{{baseUrl}}/admin/users/USER_ID_HERE/ban" } },
+        { "name": "Verification Candidates", "request": { "method": "GET", "url": "{{baseUrl}}/admin/claims/verification-candidates" } },
+        { "name": "System Health", "request": { "method": "GET", "url": "{{baseUrl}}/admin/system/health" } }
+      ]
+    }
+  ]
+}

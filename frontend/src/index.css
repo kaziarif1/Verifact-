@@ -1,0 +1,281 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Newspaper CSS variables ── */
+:root {
+  --ink:        #1a1008;
+  --ink-light:  #3d2b1f;
+  --ink-faint:  #6b5344;
+  --paper:      #f5f0e8;
+  --paper-dark: #ede7d5;
+  --paper-mid:  #e8e0cc;
+  --rule:       #2a1f14;
+  --red:        #c0392b;
+  --gold:       #b8860b;
+  --verified:   #1a5276;
+  --fact-green: #1e8449;
+  --rumor-red:  #c0392b;
+  --pending-amber: #d68910;
+}
+
+.dark {
+  --ink:        #e8dcc8;
+  --ink-light:  #c9bda8;
+  --ink-faint:  #8a7b6a;
+  --paper:      #1a1410;
+  --paper-dark: #150f0b;
+  --paper-mid:  #221a14;
+  --rule:       #5a4030;
+}
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Source Serif 4', 'Georgia', serif;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+.font-headline { font-family: 'Playfair Display', 'Georgia', serif; }
+.font-masthead { font-family: 'UnifrakturMaguntia', cursive; }
+.font-sans      { font-family: 'DM Sans', system-ui, sans-serif; }
+.font-mono      { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Newspaper components ── */
+@layer components {
+
+  /* Paper card */
+  .paper-card {
+    background: var(--paper);
+    border: 1px solid var(--paper-mid);
+    border-radius: 2px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.04);
+  }
+  .paper-card-hover {
+    @apply paper-card;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .paper-card-hover:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.14);
+    transform: translateY(-1px);
+  }
+
+  /* Rule lines (newspaper column dividers) */
+  .rule-top    { border-top: 3px double var(--rule); }
+  .rule-bottom { border-bottom: 1px solid var(--ink-faint); }
+  .rule-left   { border-left: 1px solid var(--paper-mid); }
+  .rule-thick  { border-top: 4px solid var(--ink); }
+  .rule-thin   { border-top: 1px solid var(--ink-faint); }
+
+  /* Drop cap */
+  .drop-cap::first-letter {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 3.5em;
+    font-weight: 900;
+    float: left;
+    line-height: 0.75;
+    margin: 0.05em 0.08em 0 0;
+    color: var(--ink);
+  }
+
+  /* Ink button */
+  .btn-ink {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1.5px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-ink:hover { background: var(--ink-light); border-color: var(--ink-light); }
+  .btn-ink:active { transform: scale(0.97); }
+  .btn-ink:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-outline {
+    @apply btn-ink;
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn-outline:hover { background: var(--ink); color: var(--paper); }
+
+  .btn-red {
+    @apply btn-ink;
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .btn-red:hover { background: #a93226; border-color: #a93226; }
+
+  /* Ink input */
+  .input-ink {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--paper-mid);
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-ink:focus { border-color: var(--ink); }
+  .input-ink::placeholder { color: var(--ink-faint); font-style: italic; }
+  .input-ink.error { border-color: var(--rumor-red); }
+
+  /* Column layout helpers */
+  .col-rule {
+    column-rule: 1px solid var(--paper-mid);
+    column-gap: 24px;
+  }
+
+  /* Breaking news ticker */
+  .ticker-wrap {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker-content {
+    display: inline-block;
+    animation: ticker-scroll 40s linear infinite;
+  }
+  @keyframes ticker-scroll {
+    0%   { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* Verdict badges — newspaper stamp style */
+  .stamp-fact {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 8px;
+    border: 2px solid var(--fact-green);
+    color: var(--fact-green);
+    border-radius: 2px;
+    transform: rotate(-1deg);
+  }
+  .stamp-rumor {
+    @apply stamp-fact;
+    border-color: var(--rumor-red);
+    color: var(--rumor-red);
+    transform: rotate(1deg);
+  }
+  .stamp-pending {
+    @apply stamp-fact;
+    border-color: var(--pending-amber);
+    color: var(--pending-amber);
+    transform: rotate(0deg);
+  }
+  .stamp-fact-filled {
+    @apply stamp-fact;
+    background: var(--fact-green);
+    color: white;
+  }
+  .stamp-rumor-filled {
+    @apply stamp-rumor;
+    background: var(--rumor-red);
+    color: white;
+  }
+
+  /* Category pills */
+  .category-pill {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid currentColor;
+    border-radius: 1px;
+    color: var(--ink-faint);
+  }
+
+  /* Trust meter */
+  .trust-meter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(90deg, var(--paper-mid) 25%, var(--paper-dark) 50%, var(--paper-mid) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease infinite;
+    border-radius: 2px;
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+
+  /* Page transition */
+  .page-enter { animation: pageIn 0.28s ease both; }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Ink splat animation (for voting) */
+  @keyframes splat {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+  }
+  .splat { animation: splat 0.3s ease; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--paper-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 0; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink); }
+
+  /* Selection */
+  ::selection { background: rgba(192,57,43,0.2); color: var(--ink); }
+
+  /* Newspaper column text */
+  .news-body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--ink-light);
+  }
+  .news-byline {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .news-kicker {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+}
+
+/* ── Dark mode overrides ── */
+.dark body { background: var(--paper); color: var(--ink); }
+.dark .paper-card { background: var(--paper); border-color: var(--rule); }
+.dark .input-ink { background: var(--paper-mid); border-color: var(--rule); color: var(--ink); }
+.dark .btn-outline { color: var(--ink); border-color: var(--ink); }
+.dark .btn-outline:hover { background: var(--ink); color: var(--paper-dark); }

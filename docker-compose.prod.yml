@@ -1,0 +1,36 @@
+version: '3.9'
+
+# Production overrides — use with:
+# docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  mongo:
+    # In production, use MongoDB Atlas. Remove this service and update MONGODB_URI.
+    # Keeping here for self-hosted fallback.
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
+    command: mongod --auth
+
+  backend:
+    restart: always
+    environment:
+      - NODE_ENV=production
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  ml-service:
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile        # Production Nginx build (not Dockerfile.dev)
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/ssl:/etc/nginx/ssl:ro

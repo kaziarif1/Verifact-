@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Environment files — NEVER commit these
+.env
+.env.local
+.env.production
+.env.staging
+
+# Logs
+logs/
+*.log
+
+# Keys & secrets
+*.pem
+*.key
+*.p12
+
+# ML model weights (too large for git — use HuggingFace Hub or cloud storage)
+ml-service/models/*.pkl
+ml-service/models/roberta-verifact/
+
+# Coverage
+coverage/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Docker
+docker-compose.override.yml
+
+# Uploads temp
+/tmp/verifact-uploads/
