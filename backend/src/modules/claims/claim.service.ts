@@ -54,7 +54,7 @@ export const createClaim = async (
       const uploaded = await uploadToCloudinary(file.path, 'claims', resourceType);
       mediaData = { type: resourceType, url: uploaded.url, publicId: uploaded.publicId, thumbnailUrl: uploaded.thumbnailUrl };
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
+      if (config.useInMemoryServices || process.env.NODE_ENV === 'development') {
         logger.warn('Media upload failed in development, continuing without media:', error);
         mediaData = saveMediaLocally(file, resourceType);
       } else {
