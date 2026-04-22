@@ -15,6 +15,7 @@ import { cn } from '../../utils/cn';
 import toast from 'react-hot-toast';
 
 const STAT_COLORS = ['#DC2626','#16A34A','#2563EB','#D97706'];
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 export default function AdminDashboard() {
   const qc = useQueryClient();
@@ -39,7 +40,7 @@ export default function AdminDashboard() {
   const { data: healthData } = useQuery({
     queryKey: ['admin','health'],
     queryFn: () => adminService.getDashboard().then(() =>
-      fetch('/api/v1/admin/system/health', {
+      fetch(`${API_BASE_URL}/admin/system/health`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       }).then(r => r.json()).catch(() => null)
     ),

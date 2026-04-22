@@ -4,6 +4,7 @@ Verifact ML Microservice — FastAPI entry point (Sprint 3.4)
 
 import logging
 from contextlib import asynccontextmanager
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -41,10 +42,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+backend_origins = [
+    origin.strip()
+    for origin in os.getenv("BACKEND_URL", "http://localhost:5000,http://backend:5000").split(",")
+    if origin.strip()
+]
+
 # Only allow requests from the Node.js backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5000", "http://backend:5000"],
+    allow_origins=backend_origins,
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )

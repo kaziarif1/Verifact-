@@ -5,10 +5,11 @@ import { useNotificationStore } from '../store/notificationStore';
 import type { INotification } from '../types';
 
 let socket: Socket | null = null;
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
 export const getSocket = (): Socket => {
   if (!socket) {
-    socket = io('/', { withCredentials: true, autoConnect: false });
+    socket = io(SOCKET_URL, { withCredentials: true, autoConnect: false });
   }
   return socket;
 };

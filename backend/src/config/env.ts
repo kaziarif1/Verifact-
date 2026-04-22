@@ -6,7 +6,7 @@ dotenv.config();
 const envSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
   PORT: Joi.number().default(5000),
-  FRONTEND_URL: Joi.string().uri().default('http://localhost:5173'),
+  FRONTEND_URL: Joi.string().default('http://localhost:5173'),
 
   MONGODB_URI: Joi.string().required(),
   REDIS_URL: Joi.string().required(),
@@ -45,7 +45,8 @@ if (error) {
 export const config = {
   env: env.NODE_ENV as string,
   port: env.PORT as number,
-  frontendUrl: env.FRONTEND_URL as string,
+  frontendUrl: (env.FRONTEND_URL as string).split(',')[0].trim(),
+  frontendUrls: (env.FRONTEND_URL as string).split(',').map((url) => url.trim()).filter(Boolean),
   isProduction: env.NODE_ENV === 'production',
   isTest: env.NODE_ENV === 'test',
 
