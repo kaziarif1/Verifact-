@@ -27,7 +27,7 @@ export default function Profile() {
 
   const { data: postsData } = useQuery({
     queryKey: ['userPosts', username],
-    queryFn: () => usersService.getMyPosts().then(r => r.data),
+    queryFn: () => usersService.getUserPosts(username!).then(r => r.data),
     enabled: !!profile,
   });
 

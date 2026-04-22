@@ -26,6 +26,7 @@ const perks = [
   'Build your reputation score',
   'Direct messages with other readers',
 ];
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== 'false';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -118,6 +119,15 @@ export default function Register() {
           <h1 className="font-headline text-3xl font-bold mb-1" style={{ color: 'var(--ink)' }}>Create Account</h1>
           <p className="font-sans text-sm mb-5" style={{ color: 'var(--ink-faint)' }}>Free forever. No card required.</p>
           <div className="rule-thin mb-5" />
+
+          {DEMO_MODE && (
+            <div
+              className="mb-4 px-4 py-3 font-sans text-xs"
+              style={{ background:'var(--paper-dark)', border:'1px solid var(--paper-mid)', color:'var(--ink-faint)' }}
+            >
+              Demo mode is active. Accounts and posts are stored in this browser so you can try the app without backend setup.
+            </div>
+          )}
 
           {serverError && (
             <motion.div initial={{ opacity:0,y:-6 }} animate={{ opacity:1,y:0 }}

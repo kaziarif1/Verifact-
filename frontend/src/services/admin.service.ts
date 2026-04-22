@@ -9,4 +9,5 @@ export const adminService = {
   verifyUser: (id: string) => api.patch(`/admin/users/${id}/verify`),
   banUser: (id: string) => api.patch(`/admin/users/${id}/ban`),
   getCandidates: () => api.get('/admin/claims/verification-candidates'),
+  getHealth: () => api.get('/admin/system/health'),
 };

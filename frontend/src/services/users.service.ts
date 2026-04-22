@@ -9,6 +9,7 @@ export const usersService = {
   },
   getMyStats:  () => api.get('/users/me/stats'),
   getMyPosts:  (params?: Record<string, string>) => api.get('/users/me/posts', { params }),
+  getUserPosts:(username: string, params?: Record<string, string>) => api.get(`/users/${username}/posts`, { params }),
   getMyVotes:  (params?: Record<string, string>) => api.get('/users/me/votes', { params }),
   // Follow / Unfollow
   follow:      (userId: string) => api.post(`/users/${userId}/follow`),

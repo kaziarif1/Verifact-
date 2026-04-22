@@ -22,6 +22,7 @@ const HEADLINES = [
   'THE PEOPLE DECIDE',
   'AI-POWERED ACCURACY',
 ];
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE !== 'false';
 
 const InkLetter = ({ char, delay }: { char: string; delay: number }) => (
   <motion.span
@@ -187,6 +188,17 @@ export default function Login() {
           </motion.div>
 
           <div className="rule-thin mb-6" />
+
+          {DEMO_MODE && (
+            <div
+              className="mb-4 px-4 py-3 font-sans text-xs"
+              style={{ background:'var(--paper-dark)', border:'1px solid var(--paper-mid)', color:'var(--ink-faint)' }}
+            >
+              Demo mode is active. Data is saved in this browser.
+              <br />
+              Admin login: `kazarif02@gmail.com` / `%Karif10%`
+            </div>
+          )}
 
           {/* Error */}
           {serverError && (
