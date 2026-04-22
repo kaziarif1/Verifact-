@@ -9,19 +9,17 @@ import { processTrustScoreJobData } from '../workers/trust.worker';
 const connection = { connection: getRedisClient() };
 
 const runInBackground = (task: () => Promise<void>) => {
-  setTimeout(() => {
-    task().catch((error) => logger.error('In-memory background task failed:', error));
-  }, 0);
+  return task().catch((error) => logger.error('In-memory background task failed:', error));
 };
 
 const createMemoryQueue = <T>(processor: (data: T) => Promise<void>) => ({
   async add(_name: string, data: T) {
-    runInBackground(() => processor(data));
+    await runInBackground(() => processor(data));
     return { id: `memory-${Date.now()}` };
   },
 });
 
-export const mlQueue = config.useInMemoryServices
+export const mlQueue = config.useInMemoryRedis
   ? createMemoryQueue(processMlJobData)
   : new Queue('ml-prediction', {
       ...connection,
@@ -33,7 +31,7 @@ export const mlQueue = config.useInMemoryServices
       },
     });
 
-export const trustScoreQueue = config.useInMemoryServices
+export const trustScoreQueue = config.useInMemoryRedis
   ? createMemoryQueue(processTrustScoreJobData)
   : new Queue('trust-score', {
       ...connection,
@@ -45,7 +43,7 @@ export const trustScoreQueue = config.useInMemoryServices
       },
     });
 
-export const emailQueue = config.useInMemoryServices
+export const emailQueue = config.useInMemoryRedis
   ? createMemoryQueue(processEmailJobData)
   : new Queue('email', {
       ...connection,

@@ -69,9 +69,9 @@ let redisClient: RedisLike | null = null;
 
 export const getRedisClient = (): RedisLike => {
   if (!redisClient) {
-    if (config.useInMemoryServices) {
+    if (config.useInMemoryRedis) {
       redisClient = new MemoryRedisClient();
-      logger.warn('Using in-memory Redis substitute for local development');
+      logger.warn('Using in-memory Redis substitute');
       return redisClient;
     }
 

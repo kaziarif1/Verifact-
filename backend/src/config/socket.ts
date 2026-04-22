@@ -6,6 +6,10 @@ import { logger } from '../shared/utils/logger';
 let io: SocketServer | null = null;
 
 export const initSocket = (httpServer: HttpServer): SocketServer => {
+  if (!config.realtimeEnabled) {
+    logger.warn('Realtime disabled by configuration');
+  }
+
   io = new SocketServer(httpServer, {
     cors: {
       origin: config.frontendUrls,
@@ -50,13 +54,16 @@ export const getIO = (): SocketServer => {
 // ─── Emit Helpers ─────────────────────────────────────────────────────────────
 
 export const emitToClaimRoom = (claimId: string, event: string, data: unknown): void => {
-  getIO().to(`claim:${claimId}`).emit(event, data);
+  if (!config.realtimeEnabled || !io) return;
+  io.to(`claim:${claimId}`).emit(event, data);
 };
 
 export const emitToUser = (userId: string, event: string, data: unknown): void => {
-  getIO().to(`user:${userId}`).emit(event, data);
+  if (!config.realtimeEnabled || !io) return;
+  io.to(`user:${userId}`).emit(event, data);
 };
 
 export const emitToAll = (event: string, data: unknown): void => {
-  getIO().emit(event, data);
+  if (!config.realtimeEnabled || !io) return;
+  io.emit(event, data);
 };

@@ -6,8 +6,12 @@ import type { INotification } from '../types';
 
 let socket: Socket | null = null;
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+const REALTIME_ENABLED = import.meta.env.VITE_ENABLE_REALTIME !== 'false';
 
 export const getSocket = (): Socket => {
+  if (!REALTIME_ENABLED) {
+    throw new Error('Realtime is disabled for this deployment');
+  }
   if (!socket) {
     socket = io(SOCKET_URL, { withCredentials: true, autoConnect: false });
   }
@@ -20,6 +24,7 @@ export const useSocket = () => {
   const connected = useRef(false);
 
   useEffect(() => {
+    if (!REALTIME_ENABLED) return;
     if (!isAuthenticated || connected.current) return;
     const s = getSocket();
     s.connect();
@@ -42,6 +47,7 @@ export const useClaimSocket = (
   onMlResult: (data: unknown) => void,
 ) => {
   useEffect(() => {
+    if (!REALTIME_ENABLED) return;
     if (!claimId) return;
     const s = getSocket();
     if (!s.connected) s.connect();

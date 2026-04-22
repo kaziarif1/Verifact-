@@ -5,37 +5,60 @@ import { emitToClaimRoom } from '../config/socket';
 import { config } from '../config/env';
 import { logger } from '../shared/utils/logger';
 import { MLJobData } from '../queues';
+import { classifyClaimLocally } from '../services/localMl';
 
 const processMlJob = async (job: Job<MLJobData>): Promise<void> => {
   const { claimId, text } = job.data;
   logger.info(`[ML Worker] Processing claim ${claimId}`);
 
   try {
-    const response = await fetch(`${config.ml.serviceUrl}/predict`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Internal-Key': config.ml.internalKey,
-      },
-      body: JSON.stringify({ claim_id: claimId, text }),
-      signal: AbortSignal.timeout(10000), // 10s timeout
-    });
-
-    if (!response.ok) {
-      throw new Error(`ML service responded with ${response.status}`);
-    }
-
-    const result = await response.json() as {
+    let result: {
       label: 'FACT' | 'RUMOR' | 'UNCERTAIN';
       confidence: number;
-      model_version: string;
+      modelVersion: string;
     };
+
+    const shouldUseLocalMl =
+      config.ml.provider === 'local'
+      || !config.ml.serviceUrl
+      || config.useInMemoryRedis
+      || config.isServerless;
+
+    if (shouldUseLocalMl) {
+      result = classifyClaimLocally(text);
+    } else {
+      const response = await fetch(`${config.ml.serviceUrl}/predict`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Internal-Key': config.ml.internalKey,
+        },
+        body: JSON.stringify({ claim_id: claimId, text }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`ML service responded with ${response.status}`);
+      }
+
+      const remoteResult = await response.json() as {
+        label: 'FACT' | 'RUMOR' | 'UNCERTAIN';
+        confidence: number;
+        model_version: string;
+      };
+
+      result = {
+        label: remoteResult.label,
+        confidence: remoteResult.confidence,
+        modelVersion: remoteResult.model_version,
+      };
+    }
 
     await Claim.findByIdAndUpdate(claimId, {
       $set: {
         'mlPrediction.label': result.label,
         'mlPrediction.confidence': result.confidence,
-        'mlPrediction.modelVersion': result.model_version,
+        'mlPrediction.modelVersion': result.modelVersion,
         'mlPrediction.processedAt': new Date(),
       },
     });
@@ -45,7 +68,7 @@ const processMlJob = async (job: Job<MLJobData>): Promise<void> => {
       claimId,
       label: result.label,
       confidence: result.confidence,
-      modelVersion: result.model_version,
+      modelVersion: result.modelVersion,
     });
 
     logger.info(`[ML Worker] Claim ${claimId} classified as ${result.label} (confidence: ${result.confidence})`);

@@ -23,7 +23,7 @@ const start = async (): Promise<void> => {
     initSocket(httpServer);
 
     // Start BullMQ workers only when external Redis is enabled
-    if (!config.useInMemoryServices) {
+    if (!config.useInMemoryRedis) {
       startMlWorker();
       startTrustScoreWorker();
       startEmailWorker();

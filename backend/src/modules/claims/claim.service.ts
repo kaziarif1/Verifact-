@@ -25,7 +25,7 @@ const saveMediaLocally = (file: Express.Multer.File, resourceType: 'image' | 'vi
   const filename = `${path.basename(file.filename, path.extname(file.filename))}${ext}`;
   const targetPath = path.join(LOCAL_MEDIA_DIR, filename);
   fs.copyFileSync(file.path, targetPath);
-  const publicUrl = `http://localhost:${config.port}/local-media/${filename}`;
+  const publicUrl = `${config.publicApiUrl}/local-media/${filename}`;
 
   return {
     type: resourceType,
@@ -54,7 +54,7 @@ export const createClaim = async (
       const uploaded = await uploadToCloudinary(file.path, 'claims', resourceType);
       mediaData = { type: resourceType, url: uploaded.url, publicId: uploaded.publicId, thumbnailUrl: uploaded.thumbnailUrl };
     } catch (error) {
-      if (config.useInMemoryServices || process.env.NODE_ENV === 'development') {
+      if (config.useInMemoryRedis || process.env.NODE_ENV === 'development') {
         logger.warn('Media upload failed in development, continuing without media:', error);
         mediaData = saveMediaLocally(file, resourceType);
       } else {

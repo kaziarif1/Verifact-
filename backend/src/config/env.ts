@@ -7,6 +7,7 @@ const envSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
   PORT: Joi.number().default(5000),
   FRONTEND_URL: Joi.string().default('http://localhost:5173'),
+  PUBLIC_API_URL: Joi.string().uri().optional(),
 
   MONGODB_URI: Joi.string().required(),
   REDIS_URL: Joi.string().required(),
@@ -26,9 +27,13 @@ const envSchema = Joi.object({
   SMTP_PASS: Joi.string().required(),
   EMAIL_FROM: Joi.string().default('Verifact <noreply@verifact.app>'),
 
-  ML_SERVICE_URL: Joi.string().uri().default('http://localhost:8000'),
+  ML_SERVICE_URL: Joi.string().uri().allow('').optional(),
   ML_INTERNAL_KEY: Joi.string().required(),
   USE_IN_MEMORY_SERVICES: Joi.boolean().truthy('true').truthy('1').falsy('false').falsy('0').default(false),
+  USE_IN_MEMORY_DATABASE: Joi.boolean().truthy('true').truthy('1').falsy('false').falsy('0').optional(),
+  USE_IN_MEMORY_REDIS: Joi.boolean().truthy('true').truthy('1').falsy('false').falsy('0').optional(),
+  ML_PROVIDER: Joi.string().valid('remote', 'local').default('remote'),
+  ENABLE_REALTIME: Joi.boolean().truthy('true').truthy('1').falsy('false').falsy('0').default(true),
   LOCAL_ADMIN_EMAIL: Joi.string().email().default('kazarif02@gmail.com'),
   LOCAL_ADMIN_PASSWORD: Joi.string().default('%Karif10%'),
 
@@ -49,6 +54,11 @@ export const config = {
   frontendUrls: (env.FRONTEND_URL as string).split(',').map((url) => url.trim()).filter(Boolean),
   isProduction: env.NODE_ENV === 'production',
   isTest: env.NODE_ENV === 'test',
+  isServerless: Boolean(process.env.VERCEL),
+  publicApiUrl: (env.PUBLIC_API_URL as string | undefined)?.trim()
+    || ((env.NODE_ENV === 'production' && Boolean(process.env.VERCEL_URL))
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${env.PORT as number}`),
 
   mongodb: {
     uri: env.MONGODB_URI as string,
@@ -80,11 +90,15 @@ export const config = {
   },
 
   ml: {
-    serviceUrl: env.ML_SERVICE_URL as string,
+    serviceUrl: env.ML_SERVICE_URL as string | undefined,
     internalKey: env.ML_INTERNAL_KEY as string,
+    provider: env.ML_PROVIDER as 'remote' | 'local',
   },
 
   useInMemoryServices: env.USE_IN_MEMORY_SERVICES as boolean,
+  useInMemoryDatabase: ((env.USE_IN_MEMORY_DATABASE as boolean | undefined) ?? (env.USE_IN_MEMORY_SERVICES as boolean)),
+  useInMemoryRedis: ((env.USE_IN_MEMORY_REDIS as boolean | undefined) ?? (env.USE_IN_MEMORY_SERVICES as boolean)),
+  realtimeEnabled: env.ENABLE_REALTIME as boolean,
   localAdmin: {
     email: env.LOCAL_ADMIN_EMAIL as string,
     password: env.LOCAL_ADMIN_PASSWORD as string,

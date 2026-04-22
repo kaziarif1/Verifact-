@@ -9,7 +9,7 @@ export const connectDatabase = async (): Promise<void> => {
   try {
     mongoose.set('strictQuery', true);
 
-    if (config.useInMemoryServices) {
+    if (config.useInMemoryDatabase) {
       memoryServer = await MongoMemoryServer.create();
       await mongoose.connect(memoryServer.getUri(), {
         maxPoolSize: 10,
